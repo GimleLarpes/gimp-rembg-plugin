@@ -1,14 +1,25 @@
-## EXAMPLE - ALMOST WORKING
-
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-# Modified GIMP plugin to remove backgrounds from images
-# with an option to process all open images.
-# Original author: James Huang <elastic192@gmail.com>
-# Modified by: Tech Archive <medium.com/@techarchive>
-# Rewritten by: Gimle Larpes <gimlelarpes@gmail.com>
-# Date: 13/4/25
+#
+#   GIMP - The GNU Image Manipulation Program
+#   Copyright (C) 1995 Spencer Kimball and Peter Mattis
+#
+#   gimp-tutorial-plug-in.py
+#   sample plug-in to illustrate the Python plug-in writing tutorial
+#   Copyright (C) 2023 Jacob Boerema
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import sys
 import os, string, tempfile
@@ -59,7 +70,7 @@ def store_layer_png(image, drawable, path):
       "time": True,
       "save-transparent": True
     }
-    pdbCall('file-png-export', args)
+    pdbCall('file-png-export', args);
 
     tmp_img.delete()
     
@@ -81,7 +92,7 @@ def store_layer_jpg(image, drawable, path):
       "smoothing": 0,
       "optimize": True
     }
-    pdbCall('file-jpeg-export', args)
+    pdbCall('file-jpeg-export', args);
     
     tmp_img.delete()
 
@@ -99,8 +110,8 @@ def RemoveBG(procedure, run_mode, image, drawables, config, data):
         if not dialog.run():
             return procedure.new_return_values(Gimp.PDBStatusType.CANCEL, GLib.Error())
             
-    removeTmpFile = True
-    OutputMessage = False
+    removeTmpFile = False#True
+    OutputMessage = True#False
     osName = platform.system()
     exportSep = str(os.sep)
     tdir = tempfile.gettempdir()
@@ -113,7 +124,7 @@ def RemoveBG(procedure, run_mode, image, drawables, config, data):
     y1 = 0
     option = ""
     
-    Gimp.progress_init("AI Remove image background ...")
+    Gimp.progress_init("AI Remove background ...")
     Gimp.progress_update(0.0)
             
     asMask       = config.get_property('asMask')
@@ -125,8 +136,7 @@ def RemoveBG(procedure, run_mode, image, drawables, config, data):
         msg = "data: %s %s %d %s" % (asMask, AlphaMatting, aeValue, tupleModel[selModel])
         Gimp.message(msg)
     
-    aiExe = "C:\\Users\\gimle\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\rembg.exe" # NOT WORKING?
-    # HAS TO BE INSTALLED IN: "If you want to use any Python modules, other than the standard library, you have to bundle them with your plugin. You can install them in the plugin folder with pip install --target /path/to/plugin somepackage. You can use the site module to add additional paths to the Python search path. "
+    aiExe = "C:\\Users\\gimle\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\rembg.exe"
     if OutputMessage:
         Gimp.message(aiExe)
     if AlphaMatting:
@@ -205,7 +215,7 @@ def RemoveBG(procedure, run_mode, image, drawables, config, data):
     
     return procedure.new_return_values(Gimp.PDBStatusType.SUCCESS, GLib.Error())
 
-class AIRemoveBG (Gimp.PlugIn): # START HERE, DEBUG
+class AIRemoveBG (Gimp.PlugIn):
     def do_query_procedures(self):
         return [ "plug-in-RemoveBG-python" ]
 
@@ -219,23 +229,23 @@ class AIRemoveBG (Gimp.PlugIn): # START HERE, DEBUG
 
         procedure.set_image_types("*")
 
-        procedure.set_menu_label("AI Remove image background ...")
+        procedure.set_menu_label("AI Remove background ...")
         procedure.add_menu_path('<Image>/Tools/')
 
         procedure.set_documentation("AI Remove image background",
-                                    "Remove image backgrounds using AI with an option to process all open images.",
+                                    "AI Remove image background for GIMP 3.0",
                                     name)
         procedure.set_attribution("Gimle Larpes", "Gimle Larpes", "2025")
         
-        procedure.add_boolean_argument ("asMask", _("As mask"), _("longer desc"),
+        procedure.add_boolean_argument ("asMask", _("As mask"), _("As mask"),
                                        True, GObject.ParamFlags.READWRITE)
-        procedure.add_boolean_argument ("AlphaMatting", _("alpha matting"), _("alpha matting"),
+        procedure.add_boolean_argument ("AlphaMatting", _("Alpha matting"), _("Alpha matting"),
                                        False, GObject.ParamFlags.READWRITE)
-        procedure.add_int_argument ("aeValue", _("ALPHA_MATTING_ERODE_SIZE"), _("ALPHA_MATTING_ERODE_SIZE"),
+        procedure.add_int_argument ("aeValue", _("Alpha matting erode size"), _("Alpha matting erode size"),
                                        1, 100, 15, GObject.ParamFlags.READWRITE)
-        procedure.add_int_argument ("selModel", _("Model"), _("longer desc"),
+        procedure.add_int_argument ("selModel", _("Model"), _("Model"),
                                        0, len(tupleModel), 0, GObject.ParamFlags.READWRITE)
-        
+
         return procedure
 
 Gimp.main(AIRemoveBG.__gtype__, sys.argv)
